@@ -70,6 +70,9 @@ impl HexMap {
     pub fn get_possible_moves(&self, pos: (usize, usize)) -> Vec<(usize, usize)>{
 
         let mut possible = Vec::new();
+        if let None = self.figures.get(&pos){
+            return possible;
+        }
 
         match self.figures.get(&pos).unwrap().typ{
 

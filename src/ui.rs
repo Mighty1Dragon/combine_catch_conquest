@@ -45,6 +45,11 @@ impl UI {
                 let current_x = (x as f32) + shift_x + (x as f32) * field_size;
                 draw_rectangle(current_x, current_y, field_size, field_size, GRAY );
                 draw_rectangle_lines( current_x, current_y, field_size, field_size, 5.0, BLACK);
+
+                if game.possible.contains(&(x, y)){
+                    draw_rectangle_lines(current_x, current_y, field_size, field_size, 10.0, GREEN);
+                }
+
                 if game.map.figures.contains_key(&(x, y)){
                     draw_texture(&pawn, current_x, current_y, GRAY);
 
@@ -89,7 +94,7 @@ impl UI {
             let mouse_field  = self.calc_mouse_field(&game);
             if let None = mouse_field{
                 game.selected = None;
-                print!("i was here and nowhere else!!!");
+                //print!("i was here and nowhere else!!!");
                 return;
             }
             match game.selected {
@@ -101,6 +106,9 @@ impl UI {
                 None => {
                     game.selected = mouse_field;
                     game.possible = game.map.get_possible_moves(mouse_field.unwrap());
+                    if game.possible.len() == 0 {
+                        game.selected = None;
+                    }
                 }
             }
         }
