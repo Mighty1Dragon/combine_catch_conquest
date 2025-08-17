@@ -19,6 +19,7 @@ async fn main() {
     g.map.figures.insert((6,3), Figure::new(Player::Player(0), FigureType::Pawn));
     loop{
         //clear_background(RED);
+        ui.select(&mut g);
         ui.draw(&g);
         next_frame().await
     }
