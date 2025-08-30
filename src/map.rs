@@ -1,4 +1,4 @@
-use crate::figure::{Figure, FigureType, Player};
+use crate::figure::{Figure, FigureType};
 use crate::game::Game;
 use std::collections::HashMap;
 use std::env;
@@ -24,11 +24,11 @@ pub enum Modifier {
 }
 
 #[derive(Debug)]
-struct Field {
+pub struct Field {
 
-    terrain: Terrain,
-    modi: Modifier,
-    player: Player,
+    pub terrain: Terrain,
+    pub modi: Modifier,
+    pub color: u32,
 
 }
 
@@ -59,7 +59,7 @@ impl HexMap {
                 newmap.push(Field{
                      terrain,
                      modi: Modifier::None,
-                     player: Player::None
+                     color: 0
                 });
             }
         }

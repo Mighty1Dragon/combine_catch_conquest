@@ -1,9 +1,4 @@
 
-#[derive(Debug)]
-pub enum Player{
-    Player(u8),
-    None
-}
 
 #[derive(Debug)]
 pub enum FigureType{
@@ -14,15 +9,15 @@ pub enum FigureType{
 #[derive(Debug)]
 pub struct Figure {
 
-    player: Player,
+    pub color: u32,
     value: u8,
     pub typ: FigureType
 }
 
 impl Figure {
-    pub fn new(player: Player, typ: FigureType) -> Figure{
+    pub fn new(color: u32, typ: FigureType) -> Figure{
         Figure{
-            player,
+            color,
             typ,
             value: 250
         }
@@ -48,5 +43,12 @@ impl Figure {
 
     pub fn val(&self) -> u8{
         self.value
+    }
+
+    pub fn get_type_code(&self)-> u32{
+        match &self.typ {
+            FigureType::Pawn => 1,
+            FigureType::King => 2,
+        }
     }
 }

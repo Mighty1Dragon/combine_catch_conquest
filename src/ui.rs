@@ -2,12 +2,14 @@
 use macroquad::prelude::*;
 use crate::game::*;
 use std::collections::HashMap;
+use crate::map::*;
+use crate::r#move::*;
 
 pub struct UI{
     shift_x: f32,
     shift_y: f32,
     field_size: f32,
-    textures: HashMap<i32,Texture2D> 
+    textures: HashMap<u32,Texture2D> 
 }
 
 impl UI {
@@ -15,11 +17,17 @@ impl UI {
 
         let mut textures = HashMap::new();
         textures.insert(101,  load_texture("textures/little_green_pawn.png").await.unwrap());
+        textures.insert(201,  load_texture("textures/little_red_pawn.png").await.unwrap());
+        textures.insert(102,  load_texture("textures/green_king.png").await.unwrap());
+        textures.insert(202,  load_texture("textures/red_king.png").await.unwrap());
+        textures.insert(10001, load_texture("textures/grass_tile.png").await.unwrap());
+        textures.insert(10002, load_texture("textures/water_tile.png").await.unwrap());
+
 
         UI{
             shift_x: 350.,
             shift_y: 125.,
-            field_size: 55.,
+            field_size: 50.,
             textures
         }
     }
@@ -28,12 +36,12 @@ impl UI {
 
         let shift_x = self.shift_x;
         let shift_y = self.shift_y;
-        let pawn: Texture2D = self.textures.get(&101).unwrap().clone();
-        
 
         let field_size = self.field_size;
 
-        clear_background(RED);
+        let mut pcount = 0;
+
+        clear_background(BLACK);
 
         for x in 0..game.map.x_map_bound {
            
@@ -43,15 +51,34 @@ impl UI {
                     if x % 2 == 1 { field_size/2.0 } else { 0.0 }
                 };
                 let current_x = (x as f32) + shift_x + (x as f32) * field_size;
-                draw_rectangle(current_x, current_y, field_size, field_size, GRAY );
+                //draw_rectangle(current_x, current_y, field_size, field_size, GRAY );
+                let tile = match &game.map.map.get(x + y * game.map.x_map_bound).unwrap().terrain {
+                    Terrain::Plain => 10001,
+                    Terrain::Water => 10002,
+                    _ => panic!("unprepared textures")
+                };
+
+                draw_texture(&self.textures.get(&tile).unwrap().clone(), current_x, current_y, GRAY);
+
                 draw_rectangle_lines( current_x, current_y, field_size, field_size, 5.0, BLACK);
 
                 if game.possible.contains(&(x, y)){
-                    draw_rectangle_lines(current_x, current_y, field_size, field_size, 10.0, GREEN);
+ 
+                    let move_index = game.possible.iter().position(|&r| r == (x, y)).unwrap();
+                    
+                    let outline_color = match game.move_types.get(move_index).unwrap(){
+                        MoveType::Movement => GREEN,
+                        MoveType::Melee => RED,
+                        _ => GREEN,
+                    };
+                    pcount += 1;
+                    draw_rectangle_lines(current_x, current_y, field_size, field_size, 10.0, outline_color);
                 }
 
                 if game.map.figures.contains_key(&(x, y)){
-                    draw_texture(&pawn, current_x, current_y, GRAY);
+                    let cur_fig = game.map.figures.get(&(x, y));
+                    let text_code = cur_fig.unwrap().color * 100 + cur_fig.expect("fail in draw").get_type_code();
+                    draw_texture(&self.textures.get(&text_code).unwrap().clone(), current_x, current_y, GRAY);
 
                 }
             }
@@ -105,7 +132,8 @@ impl UI {
                 },
                 None => {
                     game.selected = mouse_field;
-                    game.possible = game.map.get_possible_moves(mouse_field.unwrap());
+                    //game.possible = game.map.get_possible_moves(mouse_field.unwrap());
+                    calc_possible_moves(mouse_field.unwrap(), game);
                     if game.possible.len() == 0 {
                         game.selected = None;
                     }
